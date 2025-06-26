@@ -1,0 +1,6 @@
+pyTelegramBotAPI==4.14.1
+SQLAlchemy[asyncio]==2.0.29
+asyncpg==0.29.0
+alembic==1.13.1
+pydantic==1.10.13
+python-dotenv==1.0.1
