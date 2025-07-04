@@ -21,3 +21,8 @@ async def set_admin(session: AsyncSession, tg_id: int, value: bool) -> None:
     )
     await session.execute(stmt)
     await session.commit()
+
+async def get_admin_ids(session) -> list[int]:
+    stmt = select(User.tg_id).where(User.is_admin.is_(True))
+    res  = await session.execute(stmt)
+    return [row[0] for row in res]
