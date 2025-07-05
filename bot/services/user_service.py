@@ -26,3 +26,9 @@ async def get_admin_ids(session) -> list[int]:
     stmt = select(User.tg_id).where(User.is_admin.is_(True))
     res  = await session.execute(stmt)
     return [row[0] for row in res]
+
+async def ensure_user(session: AsyncSession, tg_user) -> User:
+    user = await get_user(session, tg_user.id)
+    if user is None:
+        user = await save_user(session, tg_user.id, tg_user.full_name)
+    return user

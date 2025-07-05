@@ -1,4 +1,7 @@
-from . import start, admin, contact_admin, review, manager_chats, program_request
+from . import (
+    start, admin, contact_admin, review,
+    manager_chats, program_request, banquet_request
+    )
 
 def register(bot, sessionmaker):
     start.register(bot, sessionmaker)
@@ -7,3 +10,4 @@ def register(bot, sessionmaker):
     review.register(bot, sessionmaker)
     manager_chats.register(bot, sessionmaker)
     program_request.register(bot, sessionmaker)
+    banquet_request.register(bot, sessionmaker)
