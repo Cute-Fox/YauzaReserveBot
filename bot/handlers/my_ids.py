@@ -9,6 +9,6 @@ def register(bot: TeleBot, sessionmaker: async_sessionmaker) -> None:
     def handle_setadmin(message: types.Message):
         async def _reply_id():
             async with sessionmaker() as session:
-                bot.reply_to(message, f"Ваш ID: {message.from_user.id}")
+                bot.reply_to(message, f"Ваш ID: {message.from_user.id}\nИспользуйте его для изменения статуса.")
 
         schedule(_reply_id())

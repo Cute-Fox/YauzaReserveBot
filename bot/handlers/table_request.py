@@ -5,9 +5,9 @@ from datetime import date, time
 from telebot import TeleBot, types
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
-from bot.utils.dateparse import DATE_FMT, parse_date, parse_time
+from bot.utils.dateparse import DATE_FMT, parse_date, parse_time, PastDateError, PastDateTimeError, ensure_future_date, ensure_future_datetime
 from bot.services import user_service
-from bot.services.table_service import save_table  # Импортируем сервис сохранения!
+from bot.services.table_service import save_table
 from bot.utils.keyboards import main_menu
 from bot.utils.notifier import notify_managers
 from bot.async_app import schedule
@@ -34,22 +34,39 @@ def register(bot: TeleBot, sm: async_sessionmaker) -> None:
 
     def _save_date(message: types.Message, data: TableRequestData) -> None:
         try:
-            data.date = parse_date(message.text)
+            d = parse_date(message.text)
+            data.date = ensure_future_date(d)
+        except PastDateError:
+            msg = bot.send_message(
+                message.chat.id,
+                "Эта дата уже прошла. Введите будущую дату (дд.мм.гггг):"
+            )
+            return bot.register_next_step_handler(msg, _save_date, data)
         except ValueError:
             msg = bot.send_message(
                 message.chat.id,
                 "Не получилось распознать дату. Попробуйте ещё раз (дд.мм.гггг):"
             )
             return bot.register_next_step_handler(msg, _save_date, data)
+
+        
         msg = bot.send_message(message.chat.id, "Введите время (например 19:30):")
         bot.register_next_step_handler(msg, _save_time, data)
 
     def _save_time(message: types.Message, data: TableRequestData) -> None:
         try:
             data.time = parse_time(message.text)
+            ensure_future_datetime(data.date, data.time)
+        except PastDateTimeError:
+            msg = bot.send_message(
+                message.chat.id,
+                "Это время уже прошло. Введите более позднее (hh:mm):"
+            )
+            return bot.register_next_step_handler(msg, _save_time, data)
         except ValueError:
             msg = bot.send_message(message.chat.id, "Время в формате hh:mm, попробуйте снова:")
             return bot.register_next_step_handler(msg, _save_time, data)
+
         msg = bot.send_message(message.chat.id, "Сколько гостей будет? (число):")
         bot.register_next_step_handler(msg, _save_guests, data)
 
