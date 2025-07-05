@@ -17,6 +17,7 @@ def register(bot: TeleBot, sm: async_sessionmaker) -> None:
         async def _process():
             async with sm() as session:
                 user = await user_service.get_user(session, tg_id)
+                admin = await user_service.is_user_admin(session, tg_id)
 
             text = (
                 "🆕 Заявка на программу мероприятий!\n\n"
@@ -32,7 +33,7 @@ def register(bot: TeleBot, sm: async_sessionmaker) -> None:
                 message.chat.id,
                 "Ваша заявка на получение программы недели передана менеджеру.\n"
                 "Мы уточним пару моментов и свяжемся с вами!",
-                reply_markup=main_menu()
+                reply_markup=main_menu(is_admin=admin)
             )
 
         schedule(_process())

@@ -15,13 +15,14 @@ def register(bot: TeleBot, sessionmaker: async_sessionmaker) -> None:
             async with sessionmaker() as session:
                 phone = await setting_service.get(session, "admin_phone")
                 name  = await setting_service.get(session, "admin_name")
+                admin = await setting_service.get(session, "admin_id")
 
                 if phone and name:
                     bot.send_message(
                         message.chat.id,
                         "Спасибо за ваш интерес! Если хотите оставить отзыв "
                         "или задать вопрос, вы можете связаться с администратором.",
-                        reply_markup=main_menu()
+                        reply_markup=main_menu(is_admin=admin)
                     )
                     bot.send_contact(
                         message.chat.id,
@@ -32,7 +33,7 @@ def register(bot: TeleBot, sessionmaker: async_sessionmaker) -> None:
                     bot.send_message(
                         message.chat.id,
                         "Контакт администратора пока не установлен.",
-                        reply_markup=main_menu()
+                        reply_markup=main_menu(is_admin=admin)
                     )
 
         schedule(send_contact())

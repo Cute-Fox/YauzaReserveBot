@@ -1,7 +1,7 @@
 from . import (
     start, admin, contact_admin, review,
     manager_chats, program_request, banquet_request,
-    table_request
+    table_request, admin_menu
     )
 
 def register(bot, sessionmaker):
@@ -13,3 +13,4 @@ def register(bot, sessionmaker):
     program_request.register(bot, sessionmaker)
     banquet_request.register(bot, sessionmaker)
     table_request.register(bot, sessionmaker)
+    admin_menu.register(bot, sessionmaker)

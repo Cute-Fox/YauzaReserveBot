@@ -12,8 +12,9 @@ def register(bot: TeleBot, sessionmaker: async_sessionmaker) -> None:
         async def _reply():
             async with sessionmaker() as session:
                 user = await user_service.get_user(session, tg_id)
+                admin = await user_service.is_user_admin(session, tg_id)
                 if user:
-                    bot.send_message(message.chat.id, f"С возвращением, {user.name}!\nВыберите действие из меню.", reply_markup=main_menu())
+                    bot.send_message(message.chat.id, f"С возвращением, {user.name}!\nВыберите действие из меню.", reply_markup=main_menu(is_admin=admin))
                 else:
                     msg = bot.send_message(message.chat.id, "Привет! Как мне к вам обращаться?")
                     bot.register_next_step_handler(msg, save_name)
@@ -32,5 +33,6 @@ def register(bot: TeleBot, sessionmaker: async_sessionmaker) -> None:
         async def _save():
             async with sessionmaker() as session:
                 await user_service.save_user(session, tg_id, name)
+                admin = await user_service.is_user_admin(session, tg_id)
         schedule(_save())
-        bot.send_message(message.chat.id, f"Приятно познакомиться, {name}!\nТеперь ты можешь выбрать действие из меню.", reply_markup=main_menu())
+        bot.send_message(message.chat.id, f"Приятно познакомиться, {name}!\nТеперь ты можешь выбрать действие из меню.", reply_markup=main_menu(is_admin=admin))

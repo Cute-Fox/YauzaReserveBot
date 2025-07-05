@@ -32,3 +32,7 @@ async def ensure_user(session: AsyncSession, tg_user) -> User:
     if user is None:
         user = await save_user(session, tg_user.id, tg_user.full_name)
     return user
+
+async def is_user_admin(session, user_id: int) -> bool:
+    user = await get_user(session, user_id)
+    return bool(user and user.is_admin)

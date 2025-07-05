@@ -72,6 +72,7 @@ def register(bot: TeleBot, sm: async_sessionmaker) -> None:
             async with sm() as session:
                 await user_service.ensure_user(session, message.from_user)
                 user = await user_service.get_user(session, tg_id)
+                admin = await user_service.is_user_admin(session, tg_id)
                 await save_table(
                     session,
                     user_id=user.id,
@@ -80,10 +81,10 @@ def register(bot: TeleBot, sm: async_sessionmaker) -> None:
                     guests=data.guests,
                     phone=data.phone,
                 )
-                return user
+                return user, admin
 
         def after_save(future):
-            user = future.result()
+            user, admin = future.result()
             text = (
                 "🍽 <b>Заявка на бронирование стола</b>\n\n"
                 f"📅 Дата: {data.date.strftime(DATE_FMT)}\n"
@@ -95,12 +96,14 @@ def register(bot: TeleBot, sm: async_sessionmaker) -> None:
             )
             notify_managers(bot, sm, text)
 
+            bot.send_message(
+                message.chat.id,
+                "Спасибо! Ваша заявка передана менеджеру. "
+                "Мы свяжемся с вами для подтверждения брони!",
+                reply_markup=main_menu(is_admin=admin)
+            )
+
         f = schedule(_save())
         f.add_done_callback(after_save)
 
-        bot.send_message(
-            message.chat.id,
-            "Спасибо! Ваша заявка передана менеджеру. "
-            "Мы свяжемся с вами для подтверждения брони!",
-            reply_markup=main_menu()
-        )
+        
