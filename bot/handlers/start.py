@@ -34,5 +34,5 @@ def register(bot: TeleBot, sessionmaker: async_sessionmaker) -> None:
             async with sessionmaker() as session:
                 await user_service.save_user(session, tg_id, name)
                 admin = await user_service.is_user_admin(session, tg_id)
+                bot.send_message(message.chat.id, f"Приятно познакомиться, {name}!\nТеперь ты можешь выбрать действие из меню.", reply_markup=main_menu(is_admin=admin))
         schedule(_save())
-        bot.send_message(message.chat.id, f"Приятно познакомиться, {name}!\nТеперь ты можешь выбрать действие из меню.", reply_markup=main_menu(is_admin=admin))
